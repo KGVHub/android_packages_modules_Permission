@@ -77,7 +77,11 @@ public class RuntimePermissionsPersistenceImpl implements RuntimePermissionsPers
             Log.i(LOG_TAG, "runtime-permissions.xml not found");
             return null;
         } catch (XmlPullParserException | IOException e) {
-            throw new IllegalStateException("Failed to read runtime-permissions.xml: " + file , e);
+            // KGV FusionX: a file cut short by a power loss or a crash mid-write used to
+            // throw here and bootloop the phone in system_server. Treat it like a missing
+            // file instead: permissions fall back to their defaults and it's written anew.
+            Log.wtf(LOG_TAG, "Failed to read runtime-permissions.xml, starting fresh: " + file, e);
+            return null;
         }
     }
 
